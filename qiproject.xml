@@ -1,0 +1,3 @@
+<project name="OpenNI2">
+  <depends buildtime="true" runtime="true" names="jpeg udev usb-1.0"/>
+</project>
