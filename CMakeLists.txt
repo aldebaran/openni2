@@ -29,7 +29,7 @@ set(XnLib_SRC ${XnLib_SRC}
   ./ThirdParty/PSCommon/XnLib/Source/XnUSB.cpp
   ./ThirdParty/PSCommon/XnLib/Source/XnVector3D.cpp
 )
-set(XnLib_LIBS DL PTHREAD RT UDEV USB_1)
+set(XnLib_LIBS DL JPEG PTHREAD RT UDEV USB_1)
 set(XnLib_INCLUDE_DIRS ./ThirdParty/PSCommon/XnLib/Include/)
 
 # set the DepthUtils sources
@@ -45,11 +45,9 @@ include_directories("./Source/Drivers/OniFile/Include/")
 file(GLOB openni2_oni_SRC
   "./Source/Drivers/OniFile/*.cpp"
   "./Source/Drivers/OniFile/Formats/*.cpp"
-  "./ThirdParty/LibJPEG/*.c"
 )
 set(openni2_oni_SRC ${openni2_oni_SRC} ${XnLib_SRC})
-qi_create_lib(OniFile ${openni2_oni_SRC})
-qi_install_target(OniFile SUBFOLDER OpenNI2/Drivers)
+qi_create_lib(OniFile ${openni2_oni_SRC} SUBFOLDER OpenNI2/Drivers)
 qi_stage_lib(OniFile)
 
 # Build OpenNI PS1080 Drivers
@@ -64,12 +62,10 @@ file(GLOB openni2_ps1080_SRC
   "./Source/Drivers/PS1080/DriverImpl/*.cpp"
   "./Source/Drivers/PS1080/Formats/*.cpp"
   "./Source/Drivers/PS1080/Sensor/*.cpp"
-  "./ThirdParty/LibJPEG/*.c"
 )
 set(openni2_ps1080_SRC ${openni2_ps1080_SRC} ${XnLib_SRC})
-qi_create_lib(PS1080 ${openni2_ps1080_SRC})
+qi_create_lib(PS1080 ${openni2_ps1080_SRC} SUBFOLDER OpenNI2/Drivers)
 qi_use_lib(PS1080 ${XnLib_LIBS})
-qi_install_target(PS1080 SUBFOLDER OpenNI2/Drivers)
 qi_stage_lib(PS1080)
 
 # Build OpenNI
@@ -79,7 +75,6 @@ include_directories("./Source/Drivers/OniFile/")
 include_directories(${XnLib_INCLUDE_DIRS})
 file(GLOB openni2_SRC
   "./Source/Core/*.cpp"
-  "./ThirdParty/LibJPEG/*.c"
 )
 set(openni2_SRC ${openni2_SRC} ${XnLib_SRC}
   "./Source/Drivers/OniFile/Formats/XnCodec.cpp"
