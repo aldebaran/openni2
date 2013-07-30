@@ -86,7 +86,7 @@ qi_stage_lib(OpenNI2)
 
 # Install the headers
 file(GLOB OpenNI2_HDR
-  "./Include/*.hpp"
+  "./Include/*.h"
 )
 qi_install_header(${OpenNI2_HDR} SUBFOLDER openni2)
 qi_install_header("./Include/Linux-x86/OniPlatformLinux-x86.h" SUBFOLDER openni2/Linux-x86)
