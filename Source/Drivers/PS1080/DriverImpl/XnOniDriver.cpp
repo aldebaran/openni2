@@ -38,7 +38,9 @@ XnOniDriver::XnOpenNILogWriter::XnOpenNILogWriter(OniDriverServices* pDriverServ
 
 void XnOniDriver::XnOpenNILogWriter::WriteEntry(const XnLogEntry* pEntry)
 {
-	m_pDriverServices->log(m_pDriverServices, pEntry->nSeverity, pEntry->strFile, pEntry->nLine, pEntry->strMask, pEntry->strMessage);
+// This is commented out by Aldebaran (vrabaud) as it seems to crash when compiled on Samuel's farm (but not when compiled anywhere else)
+// The crash is a recursive call that never ends. We also not use the logs.
+//	m_pDriverServices->log(m_pDriverServices, pEntry->nSeverity, pEntry->strFile, pEntry->nLine, pEntry->strMask, pEntry->strMessage);
 }
 
 void XnOniDriver::XnOpenNILogWriter::WriteUnformatted(const XnChar* /*strMessage*/)
