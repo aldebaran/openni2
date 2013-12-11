@@ -85,8 +85,15 @@ qi_use_lib(OpenNI2 ${XnLib_LIBS})
 qi_stage_lib(OpenNI2)
 
 # Install the headers
+#
+# Install all headers on all linux platform.
+# This is required for ARM build because, as ugly as it is, the
+# architecture header starts by including the Linux-x86 one, then
+# undefines a couple of symbols before redefining them.
+# It is so sad people does not use the macro set by the compiler :'|
 file(GLOB OpenNI2_HDR
   "./Include/*.h"
 )
 qi_install_header(${OpenNI2_HDR} SUBFOLDER openni2)
 qi_install_header("./Include/Linux-x86/OniPlatformLinux-x86.h" SUBFOLDER openni2/Linux-x86)
+qi_install_header("./Include/Linux-Arm/OniPlatformLinux-Arm.h" SUBFOLDER openni2/Linux-Arm)
