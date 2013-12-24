@@ -122,10 +122,37 @@ void xnUSBDeviceConnected(struct udev_device *dev)
 	XnUSBConnectedDevice *pConnected;
 	pConnected = XN_NEW(XnUSBConnectedDevice);
 
-	pConnected->nVendorID  = strtoul(udev_device_get_sysattr_value(dev,"idVendor"),  NULL, 16);
-	pConnected->nProductID = strtoul(udev_device_get_sysattr_value(dev,"idProduct"), NULL, 16);
-	pConnected->nBusNum    = strtoul(udev_device_get_sysattr_value(dev,"busnum"),    NULL, 10);
-	pConnected->nDevNum    = strtoul(udev_device_get_sysattr_value(dev,"devnum"),    NULL, 10);
+  const char * tmp = udev_device_get_sysattr_value(dev, "idVendor");
+  if (NULL != tmp)
+    pConnected->nVendorID  = strtoul(tmp,  NULL, 16);
+  else {
+    xnLogError(XN_MASK_USB, "Got device connection event - for an unknown device!");
+    return;
+  }
+
+  tmp = udev_device_get_sysattr_value(dev, "idProduct");
+  if (NULL != tmp)
+    pConnected->nProductID = strtoul(tmp, NULL, 16);
+  else {
+    xnLogError(XN_MASK_USB, "Got device connection event - for an unknown device!");
+    return;
+  }
+
+  tmp = udev_device_get_sysattr_value(dev, "busnum");
+  if (NULL != tmp)
+  pConnected->nBusNum = strtoul(tmp, NULL, 10);
+  else {
+    xnLogError(XN_MASK_USB, "Got device connection event - for an unknown device!");
+    return;
+  }
+
+  tmp = udev_device_get_sysattr_value(dev, "devnum");
+  if (NULL != tmp)
+  pConnected->nDevNum = strtoul(tmp, NULL, 10);
+  else {
+    xnLogError(XN_MASK_USB, "Got device connection event - for an unknown device!");
+    return;
+  }
 
 	// copy the device node path aside, to be used upon removal
 	xnOSStrCopy(pConnected->strNode, udev_device_get_devnode(dev), XN_FILE_MAX_PATH);
