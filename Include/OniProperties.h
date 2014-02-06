@@ -46,6 +46,7 @@ enum
 	STREAM_PROPERTY_HORIZONTAL_FOV			= 1, // float: radians
 	STREAM_PROPERTY_VERTICAL_FOV			= 2, // float: radians
 	STREAM_PROPERTY_VIDEO_MODE			= 3, // OniVideoMode*
+  STREAM_PROPERTY_SOFT_VIDEO_MODE			= 303, // OniVideoMode*
 
 	STREAM_PROPERTY_MAX_VALUE			= 4, // int
 	STREAM_PROPERTY_MIN_VALUE			= 5, // int

@@ -329,6 +329,11 @@ XnStatus XnOniMapStream::FillSupportedVideoModes()
 		m_aSupportedModes[i].OutputMode.pixelFormat = (OniPixelFormat)-1; // this field is not to be used here.
 	}
 
+  if(m_nSupportedModesCount > 0)
+  {
+    XnSensor::SetSoftVideoMode(&(m_aSupportedModes[m_nSupportedModesCount-1].OutputMode));
+  }
+
 	return (XN_STATUS_OK);
 }
 

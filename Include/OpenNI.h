@@ -945,6 +945,13 @@ public:
 		return videoMode;
 	}
 
+  VideoMode getSoftVideoMode() const
+  {
+    VideoMode videoMode;
+		getProperty<OniVideoMode>(STREAM_PROPERTY_SOFT_VIDEO_MODE, static_cast<OniVideoMode*>(&videoMode));
+		return videoMode;
+  }
+
 	/**
 	Changes the current video mode of this stream.  Recommended practice is to use @ref Device::getSensorInfo(), and
 	then @ref SensorInfo::getSupportedVideoModes() to obtain a list of valid video mode settings for this stream.  Then,
@@ -957,6 +964,11 @@ public:
 	{
 		return setProperty<OniVideoMode>(STREAM_PROPERTY_VIDEO_MODE, static_cast<const OniVideoMode&>(videoMode));
 	}
+
+  Status setSoftVideoMode(const VideoMode& videoMode)
+  {
+    return setProperty<OniVideoMode>(STREAM_PROPERTY_SOFT_VIDEO_MODE, static_cast<const OniVideoMode&>(videoMode));
+  }
 
 	/**
 	Provides the maximum possible value for pixels obtained by this stream.  This is most useful for

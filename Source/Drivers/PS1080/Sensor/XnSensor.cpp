@@ -65,6 +65,8 @@ typedef struct XnWaitForSycnhedFrameData
 //---------------------------------------------------------------------------
 // Code
 //---------------------------------------------------------------------------
+OniVideoMode XnSensor::ms_SoftVideoMode = {ONI_PIXEL_FORMAT_DEPTH_1_MM, 0, 0, 0}; // initialized later
+
 XnSensor::XnSensor(XnBool bResetOnStartup /* = TRUE */, XnBool bLeanInit /* = FALSE */) :
 	XnDeviceBase(),
 	m_hDisconnectedCallback(NULL),
@@ -1621,6 +1623,21 @@ XnStatus XnSensor::SetFrameSyncStreamGroup(XnDeviceStream** ppStreamList, XnUInt
 	m_frameSyncCs.Unlock();
 	
 	return XN_STATUS_OK;
+}
+
+OniVideoMode* XnSensor::GetSoftVideoMode()
+{
+  return &ms_SoftVideoMode;
+}
+
+XnStatus XnSensor::SetSoftVideoMode(const OniVideoMode* pVideoMode)
+{
+  ms_SoftVideoMode.pixelFormat = pVideoMode->pixelFormat;
+  ms_SoftVideoMode.resolutionX = pVideoMode->resolutionX;
+  ms_SoftVideoMode.resolutionY = pVideoMode->resolutionY;
+  ms_SoftVideoMode.fps = pVideoMode->fps;
+  xnLogInfo(XN_MASK_SENSOR_PROTOCOL, "SetSoftVideoMode to %d FPS, (%d x %d)", ms_SoftVideoMode.fps, ms_SoftVideoMode.resolutionX, ms_SoftVideoMode.resolutionY);
+  return XN_STATUS_OK;
 }
 
 XnStatus XN_CALLBACK_TYPE XnSensor::SetInterfaceCallback(XnActualIntProperty* /*pSender*/, XnUInt64 nValue, void* pCookie)

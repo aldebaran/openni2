@@ -113,6 +113,12 @@ void XnOniStream::stop()
 
 OniStatus XnOniStream::getProperty(int propertyId, void* data, int* pDataSize)
 {
+  if(propertyId == ONI_STREAM_PROPERTY_SOFT_VIDEO_MODE)
+  {
+    ::memcpy(data, XnSensor::GetSoftVideoMode(), sizeof(OniVideoMode));
+    return ONI_STATUS_OK;
+  }
+
 	XnStatus nRetVal = m_pDeviceStream->GetProperty(propertyId, data, pDataSize);
 	if (nRetVal != XN_STATUS_OK)
 	{
@@ -133,7 +139,16 @@ OniStatus XnOniStream::setProperty(int propertyId, const void* data, int dataSiz
 	}
 	else
 	{
-		XnStatus nRetVal = SetPropertyImpl(propertyId, data, dataSize);
+    XnStatus nRetVal;
+    if(propertyId == ONI_STREAM_PROPERTY_SOFT_VIDEO_MODE)
+      nRetVal = XnSensor::SetSoftVideoMode((OniVideoMode*)data);
+    else
+      nRetVal = SetPropertyImpl(propertyId, data, dataSize);
+
+    // If the VideoMode was set, update SoftVideoMode accordingly
+    if(propertyId == ONI_STREAM_PROPERTY_VIDEO_MODE && nRetVal == XN_STATUS_OK)
+      XnSensor::SetSoftVideoMode((OniVideoMode*)data);
+
 		switch(nRetVal)
 		{
 		case XN_STATUS_OK:

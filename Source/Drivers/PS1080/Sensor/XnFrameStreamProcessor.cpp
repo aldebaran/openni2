@@ -38,7 +38,9 @@ XnFrameStreamProcessor::XnFrameStreamProcessor(XnFrameStream* pStream, XnSensorS
 	m_bFrameCorrupted(FALSE),
 	m_bAllowDoubleSOF(FALSE),
 	m_nLastSOFPacketID(0),
-	m_nFirstPacketTimestamp(0)
+	m_nFirstPacketTimestamp(0),
+  m_nLastSOFTimestamp(0),
+  m_bProcessNextFrame(FALSE)
 {
 	sprintf(m_csInDumpMask, "%sIn", pStream->GetType());
 	sprintf(m_csInternalDumpMask, "Internal%s", pStream->GetType());
@@ -61,10 +63,27 @@ void XnFrameStreamProcessor::ProcessPacketChunk(const XnSensorProtocolResponseHe
 	{
 		if (!m_bAllowDoubleSOF || pHeader->nPacketID != (m_nLastSOFPacketID + 1))
 		{
-			m_nLastSOFPacketID = pHeader->nPacketID;
-			OnStartOfFrame(pHeader);
+      XnUInt64 currOSTime;
+      xnOSGetTimeStamp(&currOSTime);
+      static const XnUInt32 halfSensorPeriod = 33/2; // in milliseconds
+      if(currOSTime - m_nLastSOFTimestamp > 1000 / XnSensor::ms_SoftVideoMode.fps - halfSensorPeriod)
+      {
+        xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "%s: Processing frame %d, t = %d (dt = %d)", m_csName, pHeader->nPacketID, int(currOSTime), int(currOSTime - m_nLastSOFTimestamp));
+        m_nLastSOFPacketID = pHeader->nPacketID;
+        OnStartOfFrame(pHeader);
+
+        m_nLastSOFTimestamp = currOSTime;
+        m_bProcessNextFrame = TRUE;
+      }
+      else
+      {
+        m_bProcessNextFrame = FALSE;
+      }
 		}
 	}
+
+  if(!m_bProcessNextFrame)
+    return;
 
 	if (!m_bFrameCorrupted)
 	{
