@@ -92,7 +92,7 @@ XnBool g_bShouldRunUDEVThread = false;
 
 #define XN_MASK_USB "xnUSB"
 
-#define XN_USB_HANDLE_EVENTS_TIMEOUT 500
+#define XN_USB_HANDLE_EVENTS_TIMEOUT 5000 /*default was 500*/
 
 #define XN_VALIDATE_DEVICE_HANDLE(x)				\
 	if (x == NULL)									\
@@ -389,8 +389,8 @@ XN_THREAD_PROC xnUSBHandleEventsThread(XN_THREAD_PARAM pThreadParam)
 {
 	// init timeout
 	struct timeval timeout;
-	timeout.tv_sec = XN_USB_HANDLE_EVENTS_TIMEOUT / 1000;
-	timeout.tv_usec = XN_USB_HANDLE_EVENTS_TIMEOUT % 1000;
+	timeout.tv_sec = XN_USB_HANDLE_EVENTS_TIMEOUT / 1000000;
+	timeout.tv_usec = XN_USB_HANDLE_EVENTS_TIMEOUT % 1000000;
 	
 	while (g_InitData.bShouldThreadRun)
 	{
