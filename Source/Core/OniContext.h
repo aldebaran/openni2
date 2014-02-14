@@ -133,6 +133,7 @@ private:
 	xnl::Hash<XN_THREAD_ID, XN_EVENT_HANDLE> m_waitingThreads;
 
 	xnl::CriticalSection m_cs;
+    bool isShuttingDown;
 
 	char m_overrideDevice[XN_FILE_MAX_PATH];
 
