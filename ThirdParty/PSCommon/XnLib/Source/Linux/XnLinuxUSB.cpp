@@ -418,7 +418,7 @@ XnStatus xnUSBPlatformSpecificInit()
 #ifdef XN_USE_UDEV
 	// initialize the UDEV Events thread
 	g_bShouldRunUDEVThread = true;
-	nRetVal = xnOSCreateThread(xnUSBUDEVEventsThread, NULL, &g_hUDEVThread);
+	nRetVal = xnOSCreateThread(xnUSBUDEVEventsThread, NULL, &g_hUDEVThread, "ONI_USBUDEVEvents");
 	if (nRetVal != XN_STATUS_OK)
 	{
 		g_hUDEVThread = NULL;
@@ -451,7 +451,7 @@ XnStatus xnUSBAsynchThreadAddRef()
 		g_InitData.bShouldThreadRun = TRUE;
 		
 		// and start thread
-		nRetVal = xnOSCreateThread(xnUSBHandleEventsThread, NULL, &g_InitData.hThread);
+		nRetVal = xnOSCreateThread(xnUSBHandleEventsThread, NULL, &g_InitData.hThread, "ONI_USBHandleEvents");
 		if (nRetVal != XN_STATUS_OK)
 		{
 			// clean-up
@@ -1551,7 +1551,7 @@ void xnTransferCallback(libusb_transfer *pTransfer)
 	}
 }
 
-XN_C_API XnStatus xnUSBInitReadThread(XN_USB_EP_HANDLE pEPHandle, XnUInt32 nBufferSize, XnUInt32 nNumBuffers, XnUInt32 nTimeOut, XnUSBReadCallbackFunctionPtr pCallbackFunction, void* pCallbackData)
+XN_C_API XnStatus xnUSBInitReadThread(XN_USB_EP_HANDLE pEPHandle, XnUInt32 nBufferSize, XnUInt32 nNumBuffers, XnUInt32 nTimeOut, XnUSBReadCallbackFunctionPtr pCallbackFunction, void* pCallbackData, const char* pStreamName)
 {
 	XnStatus nRetVal = XN_STATUS_OK;
 	
@@ -1647,8 +1647,12 @@ XN_C_API XnStatus xnUSBInitReadThread(XN_USB_EP_HANDLE pEPHandle, XnUInt32 nBuff
 		}
 	}
 
+  // Build thread name as prefix+streamName (eg: ONI_USBReadDepth)
+  char threadName[255];
+  strcpy(threadName, "ONI_USBRead");
+  strcat(threadName, pStreamName);
 	// create a thread to perform the asynchronous read operations
-	nRetVal = xnOSCreateThread(xnUSBReadThreadMain, &pEPHandle->ThreadData, &pThreadData->hReadThread);
+	nRetVal = xnOSCreateThread(xnUSBReadThreadMain, &pEPHandle->ThreadData, &pThreadData->hReadThread, threadName);
 	if (nRetVal != XN_STATUS_OK)
 	{
 		xnCleanupThreadData(pThreadData);

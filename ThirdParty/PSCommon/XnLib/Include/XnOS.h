@@ -541,7 +541,7 @@ typedef enum XnThreadPriority
 	XN_PRIORITY_CRITICAL
 } XnThreadPriority;
 
-XN_C_API XnStatus XN_C_DECL xnOSCreateThread(XN_THREAD_PROC_PROTO pThreadProc, const XN_THREAD_PARAM pThreadParam, XN_THREAD_HANDLE* pThreadHandle);
+XN_C_API XnStatus XN_C_DECL xnOSCreateThread(XN_THREAD_PROC_PROTO pThreadProc, const XN_THREAD_PARAM pThreadParam, XN_THREAD_HANDLE* pThreadHandle, const char* pThreadName="ONI_Unnamed");
 XN_C_API XnStatus XN_C_DECL xnOSTerminateThread(XN_THREAD_HANDLE* pThreadHandle);
 XN_C_API XnStatus XN_C_DECL xnOSCloseThread(XN_THREAD_HANDLE* pThreadHandle);
 XN_C_API XnStatus XN_C_DECL xnOSWaitForThreadExit(XN_THREAD_HANDLE ThreadHandle, XnUInt32 nMilliseconds);

@@ -218,7 +218,7 @@ XN_C_API XnStatus xnSchedulerStart(XnScheduler** ppScheduler)
 	XN_CHECK_RC_AND_FREE(nRetVal, pScheduler);
 
 	// start thread
-	nRetVal = xnOSCreateThread(xnSchedulerThreadFunc, (XN_THREAD_PARAM)pScheduler, &pScheduler->hThread);
+	nRetVal = xnOSCreateThread(xnSchedulerThreadFunc, (XN_THREAD_PARAM)pScheduler, &pScheduler->hThread, "ONI_Scheduler");
 	XN_CHECK_RC_AND_FREE(nRetVal, pScheduler);
 
 	*ppScheduler = pScheduler;

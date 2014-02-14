@@ -44,7 +44,7 @@ VideoStream::VideoStream(Sensor* pSensor, const OniSensorInfo* pSensorInfo, Devi
 {
 	xnOSCreateEvent(&m_newFrameInternalEvent, false);
 	xnOSCreateEvent(&m_newFrameInternalEventForFrameHolder, false);
-	xnOSCreateThread(newFrameThread, this, &m_newFrameThread);
+	xnOSCreateThread(newFrameThread, this, &m_newFrameThread, "ONI_VideoStream");
 
 	m_pSensorInfo = XN_NEW(OniSensorInfo);
 	m_pSensorInfo->sensorType = pSensorInfo->sensorType;

@@ -30,7 +30,7 @@
 //---------------------------------------------------------------------------
 // Code
 //---------------------------------------------------------------------------
-XN_C_API XnStatus xnOSCreateThread(XN_THREAD_PROC_PROTO pThreadProc, const XN_THREAD_PARAM pThreadParam, XN_THREAD_HANDLE* pThreadHandle)
+XN_C_API XnStatus xnOSCreateThread(XN_THREAD_PROC_PROTO pThreadProc, const XN_THREAD_PARAM pThreadParam, XN_THREAD_HANDLE* pThreadHandle, const char* pThreadName)
 {
 	// Validate the input/output pointers (to make sure none of them is NULL)
 	XN_VALIDATE_INPUT_PTR(pThreadProc);
@@ -46,6 +46,12 @@ XN_C_API XnStatus xnOSCreateThread(XN_THREAD_PROC_PROTO pThreadProc, const XN_TH
 		XN_FREE_AND_NULL(*pThreadHandle);
 		return (XN_STATUS_OS_THREAD_CREATION_FAILED);
 	}
+
+  // Thread name is limited to 16 characters including the null-terminating byte
+  char name[16];
+  strncpy(name, pThreadName, 15);
+  name[15] = '\0';
+  pthread_setname_np(**pThreadHandle, name);
 
 	// All is good...
 	return (XN_STATUS_OK);

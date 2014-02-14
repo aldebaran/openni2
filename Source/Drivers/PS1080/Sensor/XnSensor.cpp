@@ -654,7 +654,7 @@ XnStatus XnSensor::InitReading()
 	XN_IS_STATUS_OK(nRetVal);
 
 	// open 'commands.txt' thread
-	nRetVal = xnOSCreateThread(XnDeviceSensorProtocolScriptThread, (XN_THREAD_PARAM)&m_DevicePrivateData, &m_DevicePrivateData.LogThread.hThread);
+	nRetVal = xnOSCreateThread(XnDeviceSensorProtocolScriptThread, (XN_THREAD_PARAM)&m_DevicePrivateData, &m_DevicePrivateData.LogThread.hThread, "ONI_ScriptThread");
 	XN_IS_STATUS_OK(nRetVal);
 
 	return XN_STATUS_OK;
