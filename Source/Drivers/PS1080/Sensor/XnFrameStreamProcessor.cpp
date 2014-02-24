@@ -66,18 +66,22 @@ void XnFrameStreamProcessor::ProcessPacketChunk(const XnSensorProtocolResponseHe
       XnUInt64 currOSTime;
       xnOSGetTimeStamp(&currOSTime);
       static const XnUInt32 halfSensorPeriod = 33/2; // in milliseconds
-      if(currOSTime - m_nLastSOFTimestamp > 1000 / XnSensor::ms_SoftVideoMode.fps - halfSensorPeriod)
+      int requiredFps = XnSensor::ms_SoftVideoMode.fps;
+      if(requiredFps > 0)
       {
-        xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "%s: Processing frame %d, t = %d (dt = %d)", m_csName, pHeader->nPacketID, int(currOSTime), int(currOSTime - m_nLastSOFTimestamp));
-        m_nLastSOFPacketID = pHeader->nPacketID;
-        OnStartOfFrame(pHeader);
+        if(currOSTime - m_nLastSOFTimestamp > 1000 / requiredFps - halfSensorPeriod)
+        {
+          xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "%s: Processing frame %d, t = %d (dt = %d)", m_csName, pHeader->nPacketID, int(currOSTime), int(currOSTime - m_nLastSOFTimestamp));
+          m_nLastSOFPacketID = pHeader->nPacketID;
+          OnStartOfFrame(pHeader);
 
-        m_nLastSOFTimestamp = currOSTime;
-        m_bProcessNextFrame = TRUE;
-      }
-      else
-      {
-        m_bProcessNextFrame = FALSE;
+          m_nLastSOFTimestamp = currOSTime;
+          m_bProcessNextFrame = TRUE;
+        }
+        else
+        {
+          m_bProcessNextFrame = FALSE;
+        }
       }
 		}
 	}

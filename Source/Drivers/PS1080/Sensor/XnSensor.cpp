@@ -65,7 +65,7 @@ typedef struct XnWaitForSycnhedFrameData
 //---------------------------------------------------------------------------
 // Code
 //---------------------------------------------------------------------------
-OniVideoMode XnSensor::ms_SoftVideoMode = {ONI_PIXEL_FORMAT_DEPTH_1_MM, 0, 0, 0}; // initialized later
+OniVideoMode XnSensor::ms_SoftVideoMode = {ONI_PIXEL_FORMAT_DEPTH_1_MM, 320, 240, 30}; // initialized later
 
 XnSensor::XnSensor(XnBool bResetOnStartup /* = TRUE */, XnBool bLeanInit /* = FALSE */) :
 	XnDeviceBase(),
