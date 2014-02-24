@@ -66,6 +66,7 @@ typedef struct XnWaitForSycnhedFrameData
 // Code
 //---------------------------------------------------------------------------
 OniVideoMode XnSensor::ms_SoftVideoMode = {ONI_PIXEL_FORMAT_DEPTH_1_MM, 320, 240, 30}; // initialized later
+OniVideoMode XnSensor::ms_VideoMode = {ONI_PIXEL_FORMAT_DEPTH_1_MM, 320, 240, 30}; // initialized later
 
 XnSensor::XnSensor(XnBool bResetOnStartup /* = TRUE */, XnBool bLeanInit /* = FALSE */) :
 	XnDeviceBase(),
@@ -1623,6 +1624,21 @@ XnStatus XnSensor::SetFrameSyncStreamGroup(XnDeviceStream** ppStreamList, XnUInt
 	m_frameSyncCs.Unlock();
 	
 	return XN_STATUS_OK;
+}
+
+OniVideoMode* XnSensor::GetVideoMode()
+{
+  return &ms_VideoMode;
+}
+
+XnStatus XnSensor::SetVideoMode(const OniVideoMode* pVideoMode)
+{
+  ms_VideoMode.pixelFormat = pVideoMode->pixelFormat;
+  ms_VideoMode.resolutionX = pVideoMode->resolutionX;
+  ms_VideoMode.resolutionY = pVideoMode->resolutionY;
+  ms_VideoMode.fps = pVideoMode->fps;
+  xnLogInfo(XN_MASK_SENSOR_PROTOCOL, "SetVideoMode to %d FPS, (%d x %d)", ms_VideoMode.fps, ms_VideoMode.resolutionX, ms_VideoMode.resolutionY);
+  return XN_STATUS_OK;
 }
 
 OniVideoMode* XnSensor::GetSoftVideoMode()

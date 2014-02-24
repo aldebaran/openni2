@@ -145,6 +145,12 @@ OniStatus XnOniStream::setProperty(int propertyId, const void* data, int dataSiz
     else
       nRetVal = SetPropertyImpl(propertyId, data, dataSize);
 
+    // If the VideoMode was set, update XnSensor::VideoMode accordingly
+    if(propertyId == ONI_STREAM_PROPERTY_VIDEO_MODE && nRetVal == XN_STATUS_OK)
+    {
+      XnSensor::SetVideoMode((OniVideoMode*)data);
+    }
+
 		switch(nRetVal)
 		{
 		case XN_STATUS_OK:

@@ -27,6 +27,8 @@
 #include <arm_neon.h>
 #endif
 
+#include "XnSensor.h"
+
 //---------------------------------------------------------------------------
 // Defines
 //---------------------------------------------------------------------------
@@ -58,8 +60,14 @@
 // Code
 //---------------------------------------------------------------------------
 XnPacked11DepthProcessor::XnPacked11DepthProcessor(XnSensorDepthStream* pStream, XnSensorStreamHelper* pHelper, XnFrameBufferManager* pBufferManager) :
-	XnDepthProcessor(pStream, pHelper, pBufferManager)
+  XnDepthProcessor(pStream, pHelper, pBufferManager),
+  m_nOffsetInFrame(0),
+  m_CurrentVideoMode(*(XnSensor::GetVideoMode())),
+  m_CurrentSoftVideoMode(*(XnSensor::GetSoftVideoMode())),
+  m_nScaleFactor(1)
 {
+  if(m_CurrentVideoMode.resolutionX > 0 && m_CurrentSoftVideoMode.resolutionX > 0)
+    m_nScaleFactor = m_CurrentVideoMode.resolutionX/m_CurrentSoftVideoMode.resolutionX;
 }
 
 XnStatus XnPacked11DepthProcessor::Init()
@@ -105,20 +113,57 @@ XnStatus XnPacked11DepthProcessor::Unpack11to16(const XnUInt8* pcInput, const Xn
 	// Convert the 11bit packed data into 16bit shorts
 	for (XnUInt32 nElem = 0; nElem < nElements; ++nElem)
 	{
-		// input:	0,  1,  2,3,  4,  5,  6,7,  8,  9,10
-		//			-,---,---,-,---,---,---,-,---,---,-
-		// bits:	8,3,5,6,2,8,1,7,4,4,7,1,8,2,6,5,3,8
-		//			---,---,-----,---,---,-----,---,---
-		// output:	  0,  1,    2,  3,  4,    5,  6,  7
+    if(m_nScaleFactor > 1)
+    {
+      XnUInt32 px = m_nOffsetInFrame%m_CurrentVideoMode.resolutionX;
+      XnUInt32 py = (m_nOffsetInFrame)/m_CurrentVideoMode.resolutionX;
 
-		a0 = (XN_TAKE_BITS(pcInput[0],8,0) << 3) | XN_TAKE_BITS(pcInput[1],3,5);
-		a1 = (XN_TAKE_BITS(pcInput[1],5,0) << 6) | XN_TAKE_BITS(pcInput[2],6,2);
-		a2 = (XN_TAKE_BITS(pcInput[2],2,0) << 9) | (XN_TAKE_BITS(pcInput[3],8,0) << 1) | XN_TAKE_BITS(pcInput[4],1,7);
-		a3 = (XN_TAKE_BITS(pcInput[4],7,0) << 4) | XN_TAKE_BITS(pcInput[5],4,4);
-		a4 = (XN_TAKE_BITS(pcInput[5],4,0) << 7) | XN_TAKE_BITS(pcInput[6],7,1);
-		a5 = (XN_TAKE_BITS(pcInput[6],1,0) << 10) | (XN_TAKE_BITS(pcInput[7],8,0) << 2) | XN_TAKE_BITS(pcInput[8],2,6);
-		a6 = (XN_TAKE_BITS(pcInput[8],6,0) << 5) | XN_TAKE_BITS(pcInput[9],5,3);
-		a7 = (XN_TAKE_BITS(pcInput[9],3,0) << 8) | XN_TAKE_BITS(pcInput[10],8,0);
+      if(py%m_nScaleFactor != 0)
+      {
+        // Skip as many pixels as possible
+        XnUInt32 nEltsToSkip =
+            XN_MIN(nElements - nElem,
+                   (m_CurrentVideoMode.resolutionX - px)/8
+                   + (m_nScaleFactor-(py%m_nScaleFactor) - 1)*m_CurrentVideoMode.resolutionX/8);
+
+        //      ::memset(pnOutput, 0, nEltsToSkip*8*sizeof(XnUInt16));
+        pcInput += nEltsToSkip*XN_INPUT_ELEMENT_SIZE;
+        pnOutput += nEltsToSkip*8;
+        m_nOffsetInFrame += nEltsToSkip*8;
+        nElem += (nEltsToSkip-1);
+        continue;
+      }
+    }
+
+    // input:  0,  1,  2,3,  4,  5,  6,7,  8,  9,10
+    //         -,---,---,-,---,---,---,-,---,---,-
+    // bits:   8,3,5,6,2,8,1,7,4,4,7,1,8,2,6,5,3,8
+    //         ---,---,-----,---,---,-----,---,---
+    // output:   0,  1,    2,  3,  4,    5,  6,  7
+    if(m_nScaleFactor == 2)
+    {
+      a0 = (XN_TAKE_BITS(pcInput[0],8,0) << 3) | XN_TAKE_BITS(pcInput[1],3,5);
+      a2 = (XN_TAKE_BITS(pcInput[2],2,0) << 9) | (XN_TAKE_BITS(pcInput[3],8,0) << 1) | XN_TAKE_BITS(pcInput[4],1,7);
+      a4 = (XN_TAKE_BITS(pcInput[5],4,0) << 7) | XN_TAKE_BITS(pcInput[6],7,1);
+      a6 = (XN_TAKE_BITS(pcInput[8],6,0) << 5) | XN_TAKE_BITS(pcInput[9],5,3);
+    }
+    else if(m_nScaleFactor == 4)
+    {
+      a0 = (XN_TAKE_BITS(pcInput[0],8,0) << 3) | XN_TAKE_BITS(pcInput[1],3,5);
+      a4 = (XN_TAKE_BITS(pcInput[5],4,0) << 7) | XN_TAKE_BITS(pcInput[6],7,1);
+    }
+    else
+    {
+      a0 = (XN_TAKE_BITS(pcInput[0],8,0) << 3) | XN_TAKE_BITS(pcInput[1],3,5);
+      a1 = (XN_TAKE_BITS(pcInput[1],5,0) << 6) | XN_TAKE_BITS(pcInput[2],6,2);
+      a2 = (XN_TAKE_BITS(pcInput[2],2,0) << 9) | (XN_TAKE_BITS(pcInput[3],8,0) << 1) | XN_TAKE_BITS(pcInput[4],1,7);
+      a3 = (XN_TAKE_BITS(pcInput[4],7,0) << 4) | XN_TAKE_BITS(pcInput[5],4,4);
+      a4 = (XN_TAKE_BITS(pcInput[5],4,0) << 7) | XN_TAKE_BITS(pcInput[6],7,1);
+      a5 = (XN_TAKE_BITS(pcInput[6],1,0) << 10) | (XN_TAKE_BITS(pcInput[7],8,0) << 2) | XN_TAKE_BITS(pcInput[8],2,6);
+      a6 = (XN_TAKE_BITS(pcInput[8],6,0) << 5) | XN_TAKE_BITS(pcInput[9],5,3);
+      a7 = (XN_TAKE_BITS(pcInput[9],3,0) << 8) | XN_TAKE_BITS(pcInput[10],8,0);
+    }
+
 
 
 #ifdef XN_NEON
@@ -136,18 +181,43 @@ XnStatus XnPacked11DepthProcessor::Unpack11to16(const XnUInt8* pcInput, const Xn
 		// Store
 		vst1q_u16(pnOutput, Q0);
 #else
-		pnOutput[0] = GetOutput(a0);
-		pnOutput[1] = GetOutput(a1);
-		pnOutput[2] = GetOutput(a2);
-		pnOutput[3] = GetOutput(a3);
-		pnOutput[4] = GetOutput(a4);
-		pnOutput[5] = GetOutput(a5);
-		pnOutput[6] = GetOutput(a6);
-		pnOutput[7] = GetOutput(a7);
+    if(m_nScaleFactor == 2)
+    {
+      *pnOutput++ = GetOutput(a0);
+      *pnOutput++ = 0;
+      *pnOutput++ = GetOutput(a2);
+      *pnOutput++ = 0;
+      *pnOutput++ = GetOutput(a4);
+      *pnOutput++ = 0;
+      *pnOutput++ = GetOutput(a6);
+      *pnOutput++ = 0;
+    }
+    else if(m_nScaleFactor == 4)
+    {
+      *pnOutput++ = GetOutput(a0);
+      *pnOutput++ = 0;
+      *pnOutput++ = 0;
+      *pnOutput++ = 0;
+      *pnOutput++ = GetOutput(a4);
+      *pnOutput++ = 0;
+      *pnOutput++ = 0;
+      *pnOutput++ = 0;
+    }
+    else
+    {
+      *pnOutput++ = GetOutput(a0);
+      *pnOutput++ = GetOutput(a1);
+      *pnOutput++ = GetOutput(a2);
+      *pnOutput++ = GetOutput(a3);
+      *pnOutput++ = GetOutput(a4);
+      *pnOutput++ = GetOutput(a5);
+      *pnOutput++ = GetOutput(a6);
+      *pnOutput++ = GetOutput(a7);
+    }
 #endif
 
 		pcInput += XN_INPUT_ELEMENT_SIZE;
-		pnOutput += 8;
+    m_nOffsetInFrame+=8;
 	}
 
 	*pnActualRead = (XnUInt32)(pcInput - pOrigInput);
@@ -204,10 +274,22 @@ void XnPacked11DepthProcessor::OnStartOfFrame(const XnSensorProtocolResponseHead
 {
 	XnDepthProcessor::OnStartOfFrame(pHeader);
 	m_ContinuousBuffer.Reset();
+  m_nOffsetInFrame = 0;
+  m_CurrentVideoMode = *(XnSensor::GetVideoMode());
+  m_CurrentSoftVideoMode = *(XnSensor::GetSoftVideoMode());
+  if(m_CurrentVideoMode.resolutionX > 0 && m_CurrentSoftVideoMode.resolutionX > 0)
+  {
+    m_nScaleFactor = m_CurrentVideoMode.resolutionX/m_CurrentSoftVideoMode.resolutionX;
+  }
+  else
+  {
+    m_nScaleFactor = 1;
+  }
 }
 
 void XnPacked11DepthProcessor::OnEndOfFrame(const XnSensorProtocolResponseHeader* pHeader)
 {
 	XnDepthProcessor::OnEndOfFrame(pHeader);
+  xnLogVerbose(XN_MASK_SENSOR_PROTOCOL, "EndOfFrame, decoded %d elements in frame", m_nOffsetInFrame);
 	m_ContinuousBuffer.Reset();
 }

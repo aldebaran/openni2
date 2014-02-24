@@ -46,6 +46,7 @@ class XnSensor : public XnDeviceBase
 
 public:
   static OniVideoMode ms_SoftVideoMode;
+  static OniVideoMode ms_VideoMode;
 
 public:
 	XnSensor(XnBool bResetOnStartup = TRUE, XnBool bLeanInit = FALSE);
@@ -92,6 +93,9 @@ public:
 	inline XnBool IsTecDebugPring() const { return (XnBool)m_FirmwareTecDebugPrint.GetValue(); }
 
 	XnStatus SetFrameSyncStreamGroup(XnDeviceStream** ppStreamList, XnUInt32 numStreams);
+
+  static OniVideoMode* GetVideoMode();
+  static XnStatus SetVideoMode(const OniVideoMode* pVideoMode);
 
   static OniVideoMode* GetSoftVideoMode();
   static XnStatus SetSoftVideoMode(const OniVideoMode* pVideoMode);
