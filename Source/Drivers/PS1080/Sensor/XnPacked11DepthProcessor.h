@@ -57,6 +57,14 @@ protected:
 private:
 	/* A buffer used for storing some left-over bytes for the next packet. */
 	XnBuffer m_ContinuousBuffer;
+
+  /* Stores the current position in the frame */
+  XnUInt32 m_nOffsetInFrame;
+
+  OniVideoMode m_CurrentVideoMode;
+  /* Stores the current soft video mode */
+  OniVideoMode m_CurrentSoftVideoMode;
+  XnUInt32 m_nScaleFactor;
 };
 
 #endif //__XN_PACKED_11_DEPTH_PROCESSOR_H__

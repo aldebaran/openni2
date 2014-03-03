@@ -49,6 +49,7 @@ OniStatus Context::initialize()
 {
 	XnBool repositoryOverridden = FALSE;
 	XnChar repositoryFromINI[XN_FILE_MAX_PATH] = {0};
+    isShuttingDown = FALSE;
 
 	m_initializationCounter++;
 	if (m_initializationCounter > 1)
@@ -280,6 +281,7 @@ XnStatus Context::loadLibraries(const char* directoryName)
 }
 void Context::shutdown()
 {
+    isShuttingDown=TRUE;
 	--m_initializationCounter;
 	if (m_initializationCounter > 0)
 	{
@@ -908,10 +910,12 @@ void ONI_CALLBACK_TYPE Context::deviceDriver_DeviceConnected(Device* pDevice, vo
 void ONI_CALLBACK_TYPE Context::deviceDriver_DeviceDisconnected(Device* pDevice, void* pCookie)
 {
 	Context* pContext = (Context*)pCookie;
-
-	pContext->m_cs.Lock();
-	pContext->m_devices.Remove(pDevice);
-	pContext->m_cs.Unlock();
+    if(!pContext->isShuttingDown)
+    {
+        pContext->m_cs.Lock();
+        pContext->m_devices.Remove(pDevice);
+        pContext->m_cs.Unlock();
+    }
 
 	pContext->m_deviceDisconnectedEvent.Raise(pDevice->getInfo());
 }

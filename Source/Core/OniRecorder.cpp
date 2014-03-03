@@ -238,7 +238,7 @@ OniStatus Recorder::initialize(const char* fileName)
 
     m_assembler.initialize();   
     
-    status = xnOSCreateThread(threadMain, this, &m_thread);
+    status = xnOSCreateThread(threadMain, this, &m_thread, "ONI_Recorder");
     if (XN_STATUS_OK != status)
     {
         return ONI_STATUS_ERROR;

@@ -188,7 +188,7 @@ OniStatus PlayerDevice::Initialize()
 	}
 
 	// Create thread for running the player.
-	XnStatus status = xnOSCreateThread(ThreadProc, this, &m_threadHandle);
+	XnStatus status = xnOSCreateThread(ThreadProc, this, &m_threadHandle, "ONI_Player");
 	if (status != XN_STATUS_OK)
 	{
 		return ONI_STATUS_ERROR;

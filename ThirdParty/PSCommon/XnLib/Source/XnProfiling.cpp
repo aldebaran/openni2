@@ -145,7 +145,7 @@ XN_C_API XnStatus xnProfilingInit(XnUInt32 nProfilingInterval)
 		XN_VALIDATE_CALLOC(g_ProfilingData.aSections, XnProfiledSection, MAX_PROFILED_SECTIONS);
 		g_ProfilingData.nSectionCount = 0;
 
-		nRetVal = xnOSCreateThread(xnProfilingThread, (XN_THREAD_PARAM)NULL, &g_ProfilingData.hThread);
+		nRetVal = xnOSCreateThread(xnProfilingThread, (XN_THREAD_PARAM)NULL, &g_ProfilingData.hThread, "ONI_Profiling");
 		XN_IS_STATUS_OK(nRetVal);
 
 		nRetVal = xnOSCreateCriticalSection(&g_ProfilingData.hCriticalSection);
