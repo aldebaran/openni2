@@ -1,2 +1,2 @@
-qi_create_bin(simple_read main.cpp NO_INSTALL)
-qi_use_lib(simple_read OPENNI2)
+add_executable(simple_read main.cpp)
+target_link_libraries(simple_read OpenNI2)
